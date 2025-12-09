@@ -9,16 +9,14 @@ app.use(express.json());
 // CORS Configuration for GitHub Pages
 app.use((req, res, next) => {
   const allowedOrigins = [
-    'http://localhost:8080',
+    'http://localhost:8081',
     'http://localhost:3000',
-    'https://yourusername.github.io', // Replace with your GitHub Pages URL
-    'https://antigravity.yourdomain.com' // Replace with your custom domain
+    'https://floriangrussgoe.github.io',
+    '*' // Allow all for now (can restrict later)
   ];
 
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
+  // Allow all origins (simplest for now)
+  res.setHeader('Access-Control-Allow-Origin', '*');
 
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');

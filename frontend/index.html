@@ -305,18 +305,17 @@
             constructor() {
                 // Stage 1: Client-Side Failover (Active)
                 this.endpoints = [
-                    'https://api.antigravity.yourdomain.com',  // Primary (Cloudflare Tunnel)
-                    'https://antigravity-fallback.fly.dev'      // Fallback (Fly.io)
+                    'https://antigravity-api-long-dawn-4688.fly.dev',  // Primary (Fly.io)
+                    'https://antigravity-fallback.fly.dev'              // Fallback (if we deploy it)
                 ];
 
                 // For local development
                 if (window.location.hostname === 'localhost') {
                     this.endpoints = [
-                        'http://localhost:8080',
-                        'https://antigravity-fallback.fly.dev'
+                        'http://localhost:8081',
+                        'https://antigravity-api-long-dawn-4688.fly.dev'
                     ];
                 }
-
                 this.currentEndpoint = 0;
                 this.stats = this.loadStats();
                 this.updateStatsDisplay();
