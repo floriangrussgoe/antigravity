@@ -1,0 +1,25 @@
+tunnel: REPLACE_WITH_YOUR_TUNNEL_ID
+credentials-file: /etc/cloudflared/credentials.json
+
+# Ingress rules for Antigravity
+ingress:
+  # Main application
+  - hostname: antigravity.yourdomain.com
+    service: http://antigravity:8080
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+      tlsTimeout: 10s
+      httpHostHeader: antigravity.yourdomain.com
+  
+  # Catch-all rule (required)
+  - service: http_status:404
+
+# Optional: Metrics endpoint
+metrics: 0.0.0.0:60123
+
+# Logging
+loglevel: info
+
+# Retry settings
+retries: 3

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity - Resilient Deployment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 60px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+
+        .status {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-bottom: 40px;
+        }
+
+        .status.loading {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: rgba(251, 191, 36, 0.4);
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .status.fallback {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: rgba(251, 191, 36, 0.4);
+        }
+
+        /* Traffic Warning Banner */
+        .traffic-warning {
+            display: none;
+            background: rgba(251, 191, 36, 0.2);
+            border: 2px solid rgba(251, 191, 36, 0.5);
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .traffic-warning.show {
+            display: block;
+        }
+
+        .traffic-warning h3 {
+            margin-bottom: 8px;
+            color: #fbbf24;
+        }
+
+        .traffic-warning p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .traffic-warning a {
+            color: #fbbf24;
+            text-decoration: underline;
+        }
+
+        .endpoints {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .endpoint {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 24px;
+            border-radius: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .endpoint:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .endpoint-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 12px;
+        }
+
+        .endpoint-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .endpoint-status.ok {
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        .endpoint-status.error {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .api-test {
+            margin-top: 40px;
+            padding: 24px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        .api-test h3 {
+            margin-bottom: 16px;
+        }
+
+        .api-test pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 8px;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .stat {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 Antigravity</h1>
+        <p class="subtitle">Resilient Deployment Demo</p>
+
+        <!-- Traffic Warning Banner -->
+        <div id="traffic-warning" class="traffic-warning">
+            <h3>⚠️ High Traffic Detected</h3>
+            <p>Your application is experiencing high traffic. Consider upgrading to Cloudflare Workers for better
+                performance.</p>
+            <p><strong>Current:</strong> Client-Side Failover (Free)</p>
+            <p><strong>Upgrade:</strong> <a href="#upgrade-info">Cloudflare Workers</a> ($0/month up to 100k
+                requests/day)</p>
+        </div>
+
+        <div id="system-status" class="status loading">⏳ Checking System Status...</div>
+
+        <!-- Traffic Statistics -->
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="total-requests">0</div>
+                <div class="stat-label">Total Requests</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="success-rate">100%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="current-endpoint">Primary</div>
+                <div class="stat-label">Active Endpoint</div>
+            </div>
+        </div>
+
+        <div class="endpoints">
+            <div class="endpoint" onclick="testEndpoint('/health')">
+                <div class="endpoint-name">Health Check</div>
+                <div class="endpoint-path">/health</div>
+                <div id="health-status" class="endpoint-status">-</div>
+            </div>
+            <div class="endpoint" onclick="testEndpoint('/status')">
+                <div class="endpoint-name">Status</div>
+                <div class="endpoint-path">/status</div>
+                <div id="status-status" class="endpoint-status">-</div>
+            </div>
+            <div class="endpoint" onclick="testEndpoint('/basic')">
+                <div class="endpoint-name">Basic Info</div>
+                <div class="endpoint-path">/basic</div>
+                <div id="basic-status" class="endpoint-status">-</div>
+            </div>
+            <div class="endpoint">
+                <div class="endpoint-name">Protected API</div>
+                <div class="endpoint-path">/api/*</div>
+                <div class="endpoint-status">🔐 Requires API Key</div>
+            </div>
+        </div>
+
+        <div class="api-test">
+            <h3>API Response</h3>
+            <button onclick="testEndpoint('/health')">Test /health</button>
+            <button onclick="testEndpoint('/status')">Test /status</button>
+            <button onclick="testEndpoint('/basic')">Test /basic</button>
+            <button onclick="resetStats()">Reset Stats</button>
+            <pre id="api-response">Click a button to test the API...</pre>
+        </div>
+
+        <div class="footer">
+            <p><strong>Stage 1:</strong> Client-Side Failover (Active) - $0/month</p>
+            <p><strong>Stage 2:</strong> Cloudflare Workers (Ready) - $0/month up to 100k req/day</p>
+            <p><strong>Stage 3:</strong> Workers Paid (Available) - $5/month for 10M req/day</p>
+            <p id="backend-url">API: <span id="api-url-display">-</span></p>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // Resilient API Client with Traffic Monitoring
+        // ============================================
+
+        class ResilientAPI {
+            constructor() {
+                // Stage 1: Client-Side Failover (Active)
+                this.endpoints = [
+                    'https://api.antigravity.yourdomain.com',  // Primary (Cloudflare Tunnel)
+                    'https://antigravity-fallback.fly.dev'      // Fallback (Fly.io)
+                ];
+
+                // For local development
+                if (window.location.hostname === 'localhost') {
+                    this.endpoints = [
+                        'http://localhost:8080',
+                        'https://antigravity-fallback.fly.dev'
+                    ];
+                }
+
+                this.currentEndpoint = 0;
+                this.stats = this.loadStats();
+                this.updateStatsDisplay();
+            }
+
+            loadStats() {
+                const saved = localStorage.getItem('api-stats');
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+                return {
+                    totalRequests: 0,
+                    successfulRequests: 0,
+                    failedRequests: 0,
+                    primaryRequests: 0,
+                    fallbackRequests: 0,
+                    lastReset: new Date().toISOString()
+                };
+            }
+
+            saveStats() {
+                localStorage.setItem('api-stats', JSON.stringify(this.stats));
+                this.updateStatsDisplay();
+                this.checkTrafficWarning();
+            }
+
+            updateStatsDisplay() {
+                document.getElementById('total-requests').textContent = this.stats.totalRequests;
+
+                const successRate = this.stats.totalRequests > 0
+                    ? Math.round((this.stats.successfulRequests / this.stats.totalRequests) * 100)
+                    : 100;
+                document.getElementById('success-rate').textContent = successRate + '%';
+
+                const currentEndpointName = this.currentEndpoint === 0 ? 'Primary' : 'Fallback';
+                document.getElementById('current-endpoint').textContent = currentEndpointName;
+            }
+
+            checkTrafficWarning() {
+                // Check if we're approaching Cloudflare Workers free tier limit
+                const requestsPerDay = this.estimateRequestsPerDay();
+                const warningEl = document.getElementById('traffic-warning');
+
+                // Show warning if approaching 80% of free tier (80k requests/day)
+                if (requestsPerDay > 80000) {
+                    warningEl.classList.add('show');
+                } else {
+                    warningEl.classList.remove('show');
+                }
+            }
+
+            estimateRequestsPerDay() {
+                const now = new Date();
+                const lastReset = new Date(this.stats.lastReset);
+                const hoursSinceReset = (now - lastReset) / (1000 * 60 * 60);
+
+                if (hoursSinceReset < 1) return 0;
+
+                const requestsPerHour = this.stats.totalRequests / hoursSinceReset;
+                return Math.round(requestsPerHour * 24);
+            }
+
+            async fetch(path, options = {}) {
+                this.stats.totalRequests++;
+                const maxRetries = this.endpoints.length;
+
+                for (let i = 0; i < maxRetries; i++) {
+                    const endpoint = this.endpoints[this.currentEndpoint];
+
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                        const response = await fetch(`${endpoint}${path}`, {
+                            ...options,
+                            signal: controller.signal
+                        });
+
+                        clearTimeout(timeoutId);
+
+                        if (response.ok) {
+                            // Success!
+                            this.stats.successfulRequests++;
+                            if (this.currentEndpoint === 0) {
+                                this.stats.primaryRequests++;
+                            } else {
+                                this.stats.fallbackRequests++;
+                            }
+                            this.saveStats();
+                            return response;
+                        }
+
+                        throw new Error(`HTTP ${response.status}`);
+                    } catch (error) {
+                        console.warn(`Endpoint ${endpoint} failed:`, error.message);
+
+                        // Try next endpoint
+                        this.currentEndpoint = (this.currentEndpoint + 1) % this.endpoints.length;
+
+                        // If this was the last retry, throw
+                        if (i === maxRetries - 1) {
+                            this.stats.failedRequests++;
+                            this.saveStats();
+                            throw error;
+                        }
+                    }
+                }
+            }
+
+            async get(path) {
+                const response = await this.fetch(path);
+                return response.json();
+            }
+
+            resetStats() {
+                this.stats = {
+                    totalRequests: 0,
+                    successfulRequests: 0,
+                    failedRequests: 0,
+                    primaryRequests: 0,
+                    fallbackRequests: 0,
+                    lastReset: new Date().toISOString()
+                };
+                this.saveStats();
+            }
+        }
+
+        // Global API instance
+        const api = new ResilientAPI();
+
+        // Update display
+        document.getElementById('api-url-display').textContent = api.endpoints[0];
+
+        // Test endpoint function
+        async function testEndpoint(path) {
+            const responseEl = document.getElementById('api-response');
+            responseEl.textContent = 'Loading...';
+
+            try {
+                const data = await api.get(path);
+                responseEl.textContent = JSON.stringify(data, null, 2);
+
+                // Update status badge
+                const statusId = path.replace('/', '') + '-status';
+                const statusEl = document.getElementById(statusId);
+                if (statusEl) {
+                    statusEl.textContent = '✅ OK';
+                    statusEl.className = 'endpoint-status ok';
+                }
+            } catch (error) {
+                responseEl.textContent = `Error: ${error.message}\n\nAll endpoints failed. System may be offline.`;
+
+                // Update status badge
+                const statusId = path.replace('/', '') + '-status';
+                const statusEl = document.getElementById(statusId);
+                if (statusEl) {
+                    statusEl.textContent = '❌ Error';
+                    statusEl.className = 'endpoint-status error';
+                }
+            }
+        }
+
+        // Reset stats function
+        function resetStats() {
+            if (confirm('Reset all traffic statistics?')) {
+                api.resetStats();
+                alert('Statistics reset successfully!');
+            }
+        }
+
+        // Check system status on load
+        async function checkSystemStatus() {
+            const statusEl = document.getElementById('system-status');
+
+            try {
+                const data = await api.get('/health');
+
+                if (data.status === 'ok') {
+                    if (data.mode === 'primary') {
+                        statusEl.textContent = '✅ System Operational (Primary)';
+                        statusEl.className = 'status';
+                    } else {
+                        statusEl.textContent = '⚠️ System Operational (Fallback Mode)';
+                        statusEl.className = 'status fallback';
+                    }
+                } else {
+                    statusEl.textContent = '⚠️ System Degraded';
+                    statusEl.className = 'status loading';
+                }
+            } catch (error) {
+                statusEl.textContent = '❌ System Offline';
+                statusEl.className = 'status error';
+            }
+        }
+
+        // Check status on page load
+        checkSystemStatus();
+
+        // Refresh status every 30 seconds
+        setInterval(checkSystemStatus, 30000);
+    </script>
+</body>
+
+</html>
