@@ -1,26 +1,39 @@
-FROM node:20-alpine
+# syntax = docker/dockerfile:1
 
-# Set working directory
+# Adjust NODE_VERSION as desired
+ARG NODE_VERSION=24.11.1
+FROM node:${NODE_VERSION}-slim AS base
+
+LABEL fly_launch_runtime="Node.js"
+
+# Node.js app lives here
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Set production environment
+ENV NODE_ENV="production"
 
-# Install dependencies
-RUN npm install --only=production
 
-# Copy application files
-COPY server.js ./
+# Throw-away build stage to reduce size of final image
+FROM base AS build
 
-# Expose port
-EXPOSE 8080
+# Install packages needed to build node modules
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:8080/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+# Install node modules
+COPY package.json ./
+RUN npm install
 
-# Run as non-root user
-USER node
+# Copy application code
+COPY . .
 
-# Start server
-CMD ["node", "server.js"]
+
+# Final stage for app image
+FROM base
+
+# Copy built application
+COPY --from=build /app /app
+
+# Start the server by default, this can be overwritten at runtime
+EXPOSE 3000
+CMD [ "npm", "run", "start" ]

@@ -83,89 +83,126 @@ app.get('/basic', (req, res) => {
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="de">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Antigravity - Resilient Deployment</title>
+      <title>Antigravity API - Enterprise Backend</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+          --onyx: #020617;
+          --liquid-gold: #F59E0B;
+          --platinum: #94A3B8;
+          --success: #10B981;
+          --glass-ultra-bg: rgba(255, 255, 255, 0.03);
+          --glass-border: rgba(255, 255, 255, 0.08);
+          --glass-highlight: rgba(255, 255, 255, 0.05);
+        }
+        
         body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: #fff;
+          font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+          background: var(--onyx);
+          color: #F8FAFC;
           min-height: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 20px;
+          padding: 40px 20px;
+          -webkit-font-smoothing: antialiased;
         }
+        
         .container {
           max-width: 800px;
-          text-align: center;
-          background: rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          width: 100%;
+          background: var(--glass-ultra-bg);
+          backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid var(--glass-border);
           border-radius: 24px;
           padding: 60px 40px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), inset 0 1px 0 var(--glass-highlight);
+          text-align: center;
         }
+        
         h1 {
           font-size: 48px;
-          margin-bottom: 16px;
           font-weight: 700;
+          letter-spacing: -0.02em;
+          margin-bottom: 12px;
+          background: linear-gradient(135deg, #F8FAFC 0%, var(--platinum) 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
+        
         .subtitle {
-          font-size: 20px;
-          opacity: 0.9;
+          font-size: 14px;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: var(--platinum);
           margin-bottom: 40px;
         }
+        
         .status {
           display: inline-block;
-          background: rgba(16, 185, 129, 0.2);
-          border: 1px solid rgba(16, 185, 129, 0.4);
+          background: rgba(16, 185, 129, 0.1);
+          border: 1px solid rgba(16, 185, 129, 0.2);
           padding: 12px 24px;
           border-radius: 12px;
           font-weight: 600;
+          color: var(--success);
           margin-bottom: 40px;
         }
+        
         .endpoints {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
           gap: 16px;
           margin-top: 40px;
         }
+        
         .endpoint {
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: var(--glass-ultra-bg);
+          border: 1px solid var(--glass-border);
           padding: 20px;
           border-radius: 12px;
-          transition: all 0.3s;
+          transition: all 0.2s;
         }
+        
         .endpoint:hover {
-          background: rgba(255, 255, 255, 0.2);
+          border-color: rgba(245, 158, 11, 0.3);
           transform: translateY(-2px);
         }
+        
         .endpoint-name {
           font-weight: 600;
           margin-bottom: 8px;
+          color: #F8FAFC;
         }
+        
         .endpoint-path {
-          font-family: 'Courier New', monospace;
+          font-family: 'SF Mono', 'Courier New', monospace;
           font-size: 14px;
-          opacity: 0.8;
+          color: var(--platinum);
         }
+        
         .footer {
           margin-top: 40px;
-          font-size: 14px;
-          opacity: 0.7;
+          padding-top: 32px;
+          border-top: 1px solid var(--glass-border);
+          font-size: 13px;
+          color: var(--platinum);
+        }
+        
+        .footer strong {
+          color: var(--liquid-gold);
         }
       </style>
     </head>
     <body>
       <div class="container">
         <h1>🚀 Antigravity</h1>
-        <p class="subtitle">Resilient Deployment Demo</p>
+        <p class="subtitle">Enterprise Backend API</p>
         <div class="status">✅ System Operational (Primary)</div>
         
         <div class="endpoints">
@@ -188,7 +225,7 @@ app.get('/', (req, res) => {
         </div>
         
         <div class="footer">
-          <p>Powered by Cloudflare Tunnel + Fly.io Fallback</p>
+          <p><strong>Powered by Fly.io</strong></p>
           <p>Uptime: ${Math.floor(process.uptime())}s</p>
         </div>
       </div>
